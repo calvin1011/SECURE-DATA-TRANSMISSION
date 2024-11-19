@@ -68,16 +68,12 @@ The client will connect to the server and send a request. The server will proces
 
 # Code Explanation
 
-    ```bash
     server.py:
-    ```
         Creates a simple Flask server that listens for incoming HTTPS requests.
         When the server receives a request with training data, it processes the data and returns a result.
         The server uses SSL/TLS to encrypt communication.
 
-    ```bash
     client.py:
-    ```
         Sends a simulated training request to the server over HTTPS.
         Receives and prints the server's response.
         Uses the requests library to make HTTPS requests with SSL encryption.
