@@ -4,7 +4,7 @@ This project demonstrates securing data transmission between a client and server
 
 ---
 
-## ** Project Overview**
+## **Project Overview**
 
 The goal of this project is to:
 
@@ -34,7 +34,7 @@ The goal of this project is to:
 
 ---
 
-## ** Requirements**
+## **Requirements**
 
 - **Python 3.x**
 - Libraries:
