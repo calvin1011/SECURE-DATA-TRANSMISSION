@@ -1,99 +1,154 @@
 # Securing Data Transmission for Remote Model Training
 
-This project demonstrates securing data transmission between a client and server during remote model training. The data is transmitted over HTTPS to ensure encryption and confidentiality. The server listens for incoming client requests, which simulate model training data being sent, and the client sends data securely over the network using requests.
-Project Overview
+This project demonstrates securing data transmission between a client and server during remote model training. It now includes features for encryption, decryption, and monitoring encrypted communication using additional tools.
 
-The goal of this project is to demonstrate the use of secure communication (via SSL/TLS) for remote model training in machine learning. The server receives training data from the client, processes it, and responds securely. This example can be extended to real-world scenarios, where sensitive data is involved in machine learning processes.
-Features
+---
 
-    Secure Data Transmission: All communication between the client and server is encrypted using HTTPS (SSL/TLS).
-    Simulated Model Training: The client simulates sending training data to a remote server, while the server processes the data and returns a response.
-    Secure Communication: Ensures that data is transmitted safely and confidentiality is maintained.
+## **Updated Project Overview**
 
-## Requirements
+The goal of this project is to:
 
-    Python 3.x
-    Libraries:
-        flask (for creating the server)
-        requests (for making HTTP requests from the client)
-        ssl (for secure SSL/TLS communication)
+- Securely transmit and process sensitive data using AES encryption over HTTPS.
+- Provide packet monitoring to detect and analyze encrypted data traffic.
+- Monitor filesystem changes for enhanced security insights.
 
-You can install the required libraries with the following command:
+---
+
+## **Features**
+
+1. **Data Encryption and Decryption**:
+   - Uses AES encryption with derived keys (PBKDF2HMAC) for secure data handling.
+   - Encrypts data before transmission and decrypts it upon receipt.
+
+2. **Secure HTTPS Communication**:
+   - All data transmissions between client and server are encrypted using HTTPS.
+   - SSL/TLS certificates are utilized for secure connections.
+
+3. **Packet Monitoring**:
+   - Captures and analyzes network packets using `pyshark`.
+   - Detects encrypted traffic and logs details for security purposes.
+
+4. **File System Monitoring**:
+   - Tracks changes in monitored directories.
+   - Logs file deletions for enhanced security auditing.
+
+---
+
+## **Updated Requirements**
+
+- **Python 3.x**
+- Libraries:
+  - `flask` (for the server)
+  - `requests` (for client communication)
+  - `cryptography` (for AES encryption and decryption)
+  - `pyshark` (for network packet monitoring)
+  - `watchdog` (for filesystem monitoring)
+  
+Install the required libraries with:
 
 ```bash
-'pip install flask requests'
+pip install flask requests cryptography pyshark watchdog
 ```
 
-## Setting Up the Project
+---
 
-    Clone this repository or download the project files.
+## **Setting Up the Project**
 
-    Make sure you have Python installed and the necessary libraries via pip as shown in the requirements section above.
+1. **Clone the Repository**:
+   - Clone or download the project files.
 
-    Generate SSL certificates for secure communication:
-        You can generate a self-signed certificate for development purposes.
-        Run the following command in your terminal to create a certificate and a private key:
+2. **Set Up Python Environment**:
+   - Install the required libraries listed above.
 
-        ```bash
-        openssl req -new -x509 -keyout server.key -out server.crt -days 365
-        ```
+3. **Generate SSL Certificates**:
+   - Use the following command to create certificates for HTTPS communication:
+     ```bash
+     openssl req -new -x509 -keyout server.key -out server.crt -days 365
+     ```
+   - Place `server.crt` and `server.key` in the project directory.
 
-This will create two files: server.crt and server.key
+4. **Set Environment Variables**:
+   - Configure sensitive data like passwords and salts in environment variables.
 
-## How to Run the Project
-Step 1: Run the Server
+---
 
-    Open a terminal and navigate to the project directory.
-    Run the server script:
+## **How to Run the Project**
 
-    ```bash
-    python server.py
-    ```
-
-You should see output like this indicating that the server is up and running:
+### **Step 1: Start the Server**
 ```bash
-Server is running and waiting for client connections...
+python server.py
+```
+Expected output:
+```
+Server running and waiting for encrypted client data...
 ```
 
-Step 2: Run the Client
+### **Step 2: Send Encrypted Data Using the Client**
+```bash
+python client.py
+```
 
-    Open another terminal and navigate to the project directory.
-    Run the client script:
+### **Step 3: Monitor Network Traffic**
+- Start packet monitoring on a specific interface (e.g., Wi-Fi):
+  ```bash
+  python monitor.py
+  ```
+- Captured packets are saved to `output.pcap`.
 
-    ```bash
-    python client.py
+### **Step 4: Monitor File Changes**
+- Run the file system monitoring script:
+  ```bash
+  python monitor.py
+  ```
+
+---
+
+## **Code Explanation**
+
+1. **Encryption and Decryption**:
+   - `encryption.py` contains functions for key derivation, AES encryption, and decryption.
+
+2. **Client**:
+   - Encrypts data using `encryption.py` and sends it securely to the server.
+
+3. **Server**:
+   - Decrypts received data and logs responses.
+
+4. **Packet Monitoring**:
+   - Captures and logs network packets.
+   - Analyzes encrypted traffic.
+
+5. **File System Monitoring**:
+   - Tracks and logs file deletions in specified directories.
+
+---
+
+## **Troubleshooting**
+
+- **SSL Verification Errors**:
+  - For self-signed certificates, disable verification in the client (development only):
+    ```python
+    requests.post(SERVER_URL, json=data, verify=False)
     ```
 
-The client will connect to the server and send a request. The server will process the data and send a response back securely.
-
-# Code Explanation
-
-    server.py:
-        Creates a simple Flask server that listens for incoming HTTPS requests.
-        When the server receives a request with training data, it processes the data and returns a result.
-        The server uses SSL/TLS to encrypt communication.
-
-    client.py:
-        Sends a simulated training request to the server over HTTPS.
-        Receives and prints the server's response.
-        Uses the requests library to make HTTPS requests with SSL encryption.
-
-    SSL/TLS:
-        SSL certificates (server.crt and server.key) are used to secure communication.
-        The server is configured to only accept HTTPS connections, ensuring that data is encrypted during transmission.
-
-# Troubleshooting
-
-    SSL Errors: If you're getting SSL verification errors when running the client, it could be because you're using a self-signed certificate. In that case, you can disable SSL verification in requests by setting verify=False in the client script:
-
+- **Packet Monitoring Permissions**:
+  - Run packet monitoring with elevated privileges:
     ```bash
-    response = requests.post('https://localhost:5000/train', json=data, verify=False)
+    sudo python monitor.py
     ```
 
-(Note: Disabling SSL verification is not recommended in production environments).
+---
 
-# Future Improvements
+## **Future Improvements**
 
-    Enhanced Security: Implement proper certificate validation and improve the security of the communication.
-    Authentication: Add authentication mechanisms (e.g., API keys, JWT) to ensure that only authorized clients can connect.
-    Model Training Integration: Integrate this project with an actual machine learning model training process, where the server can train a model on the data received.
+1. **Enhanced Security**:
+   - Use production-grade certificates and enforce strong encryption standards.
+
+2. **Authentication**:
+   - Add user authentication to secure endpoints further.
+
+3. **Real-World Integration**:
+   - Extend functionality for real machine learning workflows.
+
+4. **Custom Alerts**:
+   - Trigger notifications for unusual packet or filesystem activity.

@@ -1,25 +1,33 @@
 from flask import Flask, request, jsonify
 from encryption import generate_key, decrypt_data
+import os
 
 app = Flask(__name__)
 
-# Password and salt for key generation (shared secret)
-PASSWORD = "securepassword"
-SALT = b'somesaltvalue'
+# Use environment variables for sensitive data
+PASSWORD = os.getenv('ENCRYPTION_PASSWORD', 'securepassword')
+SALT = os.getenv('ENCRYPTION_SALT', b'somesaltvalue')
 
 @app.route('/receive', methods=['POST'])
 def receive_data():
-    # Get encrypted data from the client
+    # Validate input
     data = request.json
-    iv = bytes.fromhex(data['iv'])
-    ciphertext = bytes.fromhex(data['ciphertext'])
+    if not data or 'iv' not in data or 'ciphertext' not in data:
+        return jsonify({"error": "Invalid input data"}), 400
 
-    # Generate the encryption key
-    key = generate_key(PASSWORD, SALT)
+    try:
+        # Convert received data
+        iv = bytes.fromhex(data['iv'])
+        ciphertext = bytes.fromhex(data['ciphertext'])
 
-    # Decrypt the data
-    plaintext = decrypt_data(key, iv, ciphertext)
-    return jsonify({"message": "Data received and decrypted successfully", "data": plaintext})
+        # Generate key and decrypt
+        key = generate_key(PASSWORD, SALT)
+        plaintext = decrypt_data(key, iv, ciphertext)
+
+        return jsonify({"message": "Data received and decrypted successfully", "data": plaintext})
+
+    except Exception as e:
+        return jsonify({"error": f"Decryption failed: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
